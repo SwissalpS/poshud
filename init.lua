@@ -128,7 +128,7 @@ local function get_time()
 end
 
 -- rotating star
-local star={"\\", "|", "/", "-"}
+local star={"/", "|, "-", "\\""}
 
 -- track time of last call
 local l_time = 0
@@ -177,18 +177,18 @@ minetest.register_globalstep(function (dtime)
 		local x = math.floor(posi.x+0.5)
 		local y = math.floor(posi.y+0.5)
 		local z = math.floor(posi.z+0.5)
-		local posistr = x.." ".. y .." ".. z
+		local posistr = x.."|".. y .."|".. z
 
 		-- resulting hud string
 		local hud_display = h_text .. "\nPos: " .. posistr
 
 		-- append mapblock
-		local mapblockstr = math.floor(x / 16) .. " "
-				.. math.floor(y / 16) .. " "
+		local mapblockstr = math.floor(x / 16) .. "|"
+				.. math.floor(y / 16) .. "|"
 				.. math.floor(z / 16)
 
 
-		hud_display = hud_display .. "\nMapblock: " .. mapblockstr
+		hud_display = hud_display .. "\nBlock: " .. mapblockstr
 		
 		updatehud(player,  hud_display)
 	end
