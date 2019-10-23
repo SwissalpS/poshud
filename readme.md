@@ -10,5 +10,5 @@ Adds hud elements for current position, time and mapblock coordinates
 Settings with default values:
 ```
 # hud offsets
-poshud.hud.offsetx = 0.8
-poshud.hud.offsety = 0.95
+poshud_light.hud.offsetx = 0.8
+poshud_light.hud.offsety = 0.95
