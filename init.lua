@@ -9,11 +9,10 @@
 ----------------Zeno` simplified some math and additional tweaks ---------------
 --------------------------------------------------------------------------------
 
-poshud = {
+poshud_light = {
 	-- Position of hud
-	posx = tonumber(minetest.settings:get("poshud.hud.offsetx") or 0.8),
-	posy = tonumber(minetest.settings:get("poshud.hud.offsety") or 0.95),
-	enable_mapblock = minetest.settings:get_bool("poshud.mapblock.enable")
+	posx = tonumber(minetest.settings:get("poshud_light.hud.offsetx") or 0.8),
+	posy = tonumber(minetest.settings:get("poshud_light.hud.offsety") or 0.95)
 }
 
 --settings
@@ -42,8 +41,8 @@ local function generatehud(player)
 	local hud = {}
 	hud.id = player:hud_add({
 		hud_elem_type = "text",
-		name = "poshud",
-		position = {x=poshud.posx, y=poshud.posy},
+		name = "poshud_light",
+		position = {x=poshud_light.posx, y=poshud_light.posy},
 		offset = {x=8, y=-8},
 		text = "Initializing...",
 		scale = {x=100,y=100},
@@ -131,23 +130,10 @@ end
 -- rotating star
 local star={"\\", "|", "/", "-"}
 
--- New lagometry algorithm:
--- Make a list of N samples
--- Every sample is time from last step, therefore "lag"
--- Since time distance between samples is not equal, every sample needs
--- to be weighted by... time, which is itself. This results in:
--- avg_lag = sum(xi^2) / sum(xi)
--- Results of sums are cached for performance (subtract old sample, add new sample)
-
+-- track time of last call
 local l_time = 0
-local l_N = 2048
-local l_samples = {}
-local l_ctr = 0
-local l_sumsq = 0
-local l_sum = 0
-local l_max = 0.1
 
-
+-- time string, common to all players
 local h_text = "Initializing..."
 local h_int = 2
 local h_tmr = 0
@@ -163,33 +149,9 @@ minetest.register_globalstep(function (dtime)
 	end
 	l_time = os.clock()
 	
-	local olds = l_samples[l_ctr+1] or 0
-	l_sumsq = l_sumsq - olds*olds + news*news
-	l_sum = l_sum - olds + news
-	
-	l_samples[l_ctr+1] = news
-	l_max = math.max(l_max, news)
-	
-	l_ctr = (l_ctr + 1) % l_N
-	
-	if l_ctr == 0 then
-		-- recalculate from scratch
-		l_sumsq = 0
-		l_sum = 0
-		l_max = 0
-		for i=1,l_N do
-			local sample = l_samples[i]
-			l_sumsq = l_sumsq + sample*sample
-			l_sum = l_sum + sample
-			l_max = math.max(l_max, sample)
-		end
-	end
-	
 	-- update hud text when necessary
 	if h_tmr <= 0 then
-		local l_avg = l_sumsq / l_sum
 		-- Update hud text that is the same for all players
-		local s_lag = string.format("Lag: %.2f avg: %.2f peak: %.2f", news, l_avg, l_max)
 		local s_time = "Time: "..get_time()
 		
 		local s_rwt = ""
@@ -200,10 +162,10 @@ minetest.register_globalstep(function (dtime)
 		local s_star = ""
 		if enable_star then
 			s_star = star[starc+1]
-            starc = (starc + 1) % 4
+			starc = (starc + 1) % 4
 		end
 		
-		h_text = s_time .. "   " .. s_star .. s_rwt .. "\n" .. s_lag
+		h_text = s_time .. "   " .. s_star .. s_rwt
 		
 		h_tmr = h_int
 	else
@@ -220,16 +182,14 @@ minetest.register_globalstep(function (dtime)
 		-- resulting hud string
 		local hud_display = h_text .. "\nPos: " .. posistr
 
-		if poshud.enable_mapblock then
-			-- append if enabled
-			local mapblockstr = math.floor(x / 16) .. " "
+		-- append mapblock
+		local mapblockstr = math.floor(x / 16) .. " "
 				.. math.floor(y / 16) .. " "
 				.. math.floor(z / 16)
 
 
-			hud_display = hud_display .. "\nMapblock: " .. mapblockstr
-		end
-
+		hud_display = hud_display .. "\nMapblock: " .. mapblockstr
+		
 		updatehud(player,  hud_display)
 	end
 end);
