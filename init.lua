@@ -127,7 +127,7 @@ local function get_time()
 end
 
 -- rotating star
-local star={"/", "|, "-", "\\""}
+local star={"/", "|", "-", "\\"}
 
 -- track time of last call
 local l_time = 0
