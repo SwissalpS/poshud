@@ -64,9 +64,8 @@ local function updatehud(player, text)
 		generatehud(player)
 	end
 	local hud = player_hud[name]
-	if hud and text ~= hud.text then
+	if hud then
 		player:hud_change(hud.id, "text", text)
-		hud.text = text
 	end
 end
 
@@ -150,27 +149,28 @@ minetest.register_globalstep(function (dtime)
 	l_time = os.clock()
 	
 	-- update hud text when necessary
-	if h_tmr <= 0 then
-		-- Update hud text that is the same for all players
-		local s_time = "Time: "..get_time()
-		
-		local s_rwt = ""
-		if advtrains and advtrains.lines and advtrains.lines.rwt then
-			s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
-		end
-		
-		local s_star = ""
-		if enable_star then
-			s_star = star[starc+1]
-			starc = (starc + 1) % 4
-		end
-		
-		h_text = s_time .. "   " .. s_star .. s_rwt
-		
-		h_tmr = h_int
-	else
+	if h_tmr > 0 then
 		h_tmr = h_tmr - news
+		return
 	end
+	
+	-- Update hud text that is the same for all players
+	local s_time = "Time: "..get_time()
+	
+	local s_rwt = ""
+	if advtrains and advtrains.lines and advtrains.lines.rwt then
+		s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
+	end
+	
+	local s_star = ""
+	if enable_star then
+		s_star = star[starc+1]
+		starc = (starc + 1) % 4
+	end
+		
+	h_text = s_time .. "   " .. s_star .. s_rwt
+		
+	h_tmr = h_int
 	
 	for _,player in ipairs(minetest.get_connected_players()) do
 		local posi = player:get_pos()
