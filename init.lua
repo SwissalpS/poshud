@@ -15,6 +15,9 @@ poshud_light = {
 	posy = tonumber(minetest.settings:get("poshud_light.hud.offsety") or 0.95)
 }
 
+-- deps
+local has_advtrains_mod = minetest.get_modpath("advtrains")
+
 --settings
 
 local colour = 0xFFFFFF  --text colour in hex format default is white
@@ -151,7 +154,7 @@ minetest.register_globalstep(function()
 	local s_time = "Time: "..get_time()
 
 	local s_rwt = ""
-	if advtrains and advtrains.lines and advtrains.lines.rwt then
+	if has_advtrains_mod and advtrains.lines and advtrains.lines.rwt then
 		s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 	end
 
