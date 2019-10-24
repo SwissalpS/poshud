@@ -18,8 +18,6 @@ poshud_light = {
 --settings
 
 colour = 0xFFFFFF  --text colour in hex format default is white
-enable_star = true
-
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -126,9 +124,6 @@ local function get_time()
 	return ("%02d:%02d"):format(h, m);
 end
 
--- rotating star
-local star={"/", "|", "-", "\\"}
-
 -- track time of last call
 local l_time = 0
 
@@ -161,14 +156,8 @@ minetest.register_globalstep(function (dtime)
 	if advtrains and advtrains.lines and advtrains.lines.rwt then
 		s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 	end
-	
-	local s_star = ""
-	if enable_star then
-		s_star = star[starc+1]
-		starc = (starc + 1) % 4
-	end
 		
-	h_text = s_time .. "   " .. s_star .. s_rwt
+	h_text = s_time .. "   " .. s_rwt
 		
 	h_tmr = h_int
 	
@@ -177,14 +166,14 @@ minetest.register_globalstep(function (dtime)
 		local x = math.floor(posi.x+0.5)
 		local y = math.floor(posi.y+0.5)
 		local z = math.floor(posi.z+0.5)
-		local posistr = x.."|".. y .."|".. z
+		local posistr = x.." | ".. y .." | ".. z
 
 		-- resulting hud string
 		local hud_display = h_text .. "\nPos: " .. posistr
 
 		-- append mapblock
-		local mapblockstr = math.floor(x / 16) .. "|"
-				.. math.floor(y / 16) .. "|"
+		local mapblockstr = math.floor(x / 16) .. " | "
+				.. math.floor(y / 16) .. " | "
 				.. math.floor(z / 16)
 
 
