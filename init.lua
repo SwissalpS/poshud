@@ -134,11 +134,12 @@ local h_tmr = 0
 minetest.register_globalstep(function()
 	-- make a lag sample
 
-	local news = os.clock() - l_time
+	local now = os.clock()
+	local news = now - l_time
 	if l_time == 0 then
 		news = 0.1
 	end
-	l_time = os.clock()
+	l_time = now
 
 	-- update hud text when necessary
 	if h_tmr > 0 then
