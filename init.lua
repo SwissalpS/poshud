@@ -15,9 +15,12 @@ poshud_light = {
 	posy = tonumber(minetest.settings:get("poshud_light.hud.offsety") or 0.95)
 }
 
+-- deps
+local has_advtrains_mod = minetest.get_modpath("advtrains")
+
 --settings
 
-colour = 0xFFFFFF  --text colour in hex format default is white
+local colour = 0xFFFFFF  --text colour in hex format default is white
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -118,7 +121,6 @@ end
 
 local function get_time()
 	local secs = (60*60*24*minetest.get_timeofday());
-	local s = floormod(secs, 60);
 	local m = floormod(secs/60, 60);
 	local h = floormod(secs/3600, 60);
 	return ("%02d:%02d"):format(h, m);
@@ -132,35 +134,34 @@ local h_text = "Initializing..."
 local h_int = 2
 local h_tmr = 0
 
-local starc = 0
-
-minetest.register_globalstep(function (dtime)
+minetest.register_globalstep(function()
 	-- make a lag sample
-	
-	local news = os.clock() - l_time
+
+	local now = os.clock()
+	local news = now - l_time
 	if l_time == 0 then
 		news = 0.1
 	end
-	l_time = os.clock()
-	
+	l_time = now
+
 	-- update hud text when necessary
 	if h_tmr > 0 then
 		h_tmr = h_tmr - news
 		return
 	end
-	
+
 	-- Update hud text that is the same for all players
 	local s_time = "Time: "..get_time()
-	
+
 	local s_rwt = ""
-	if advtrains and advtrains.lines and advtrains.lines.rwt then
+	if has_advtrains_mod and advtrains.lines and advtrains.lines.rwt then
 		s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 	end
-		
+
 	h_text = s_time .. "   " .. s_rwt
-		
+
 	h_tmr = h_int
-	
+
 	for _,player in ipairs(minetest.get_connected_players()) do
 		local posi = player:get_pos()
 		local x = math.floor(posi.x+0.5)
@@ -178,7 +179,7 @@ minetest.register_globalstep(function (dtime)
 
 
 		hud_display = hud_display .. "\nBlock: " .. mapblockstr
-		
+
 		updatehud(player,  hud_display)
 	end
 end);
