@@ -1,4 +1,4 @@
---Simple head-up display for current position, time and server lag.
+--Simple head-up display for current position in space and time.
 
 -- Origin:
 --ver 0.2.1 minetest_time
@@ -54,6 +54,7 @@ local function generatehud(player)
 end
 
 local function updatehud(player, text)
+
 	local name = player:get_player_name()
 
 	if player_hud_enabled[name]==false then
@@ -64,10 +65,29 @@ local function updatehud(player, text)
 	if not player_hud[name] then
 		generatehud(player)
 	end
+
 	local hud = player_hud[name]
-	if hud then
-		player:hud_change(hud.id, "text", text)
-	end
+	if not hud then return end
+
+	local posi = player:get_pos()
+	local x = math.floor(posi.x + 0.5)
+	local y = math.floor(posi.y + 0.5)
+	local z = math.floor(posi.z + 0.5)
+	local posistr = x.." | ".. y .." | ".. z
+
+	-- resulting hud string
+	local hud_display = text .. "\nPos: " .. posistr
+
+	-- append mapblock
+	local mapblockstr = math.floor(x / 16) .. " | "
+			.. math.floor(y / 16) .. " | "
+			.. math.floor(z / 16)
+
+
+	hud_display = hud_display .. "\nBlock: " .. mapblockstr
+
+	player:hud_change(hud.id, "text", hud_display)
+
 end
 
 local function removehud(player)
@@ -127,59 +147,29 @@ local function get_time()
 end
 
 -- track time of last call
-local l_time = 0
-
--- time string, common to all players
-local h_text = "Initializing..."
-local h_int = 2
-local h_tmr = 0
+local time_next_refresh = 0
 
 minetest.register_globalstep(function()
-	-- make a lag sample
 
+	-- time to update?
 	local now = os.clock()
-	local news = now - l_time
-	if l_time == 0 then
-		news = 0.1
-	end
-	l_time = now
+	if time_next_refresh > now then return end
 
-	-- update hud text when necessary
-	if h_tmr > 0 then
-		h_tmr = h_tmr - news
-		return
-	end
+	time_next_refresh = now + 2
 
 	-- Update hud text that is the same for all players
-	local s_time = "Time: "..get_time()
+	local s_time = "Time: " .. get_time()
 
 	local s_rwt = ""
 	if has_advtrains_mod and advtrains.lines and advtrains.lines.rwt then
 		s_rwt = "\nRailway Time: "..advtrains.lines.rwt.to_string(advtrains.lines.rwt.now(), true)
 	end
 
-	h_text = s_time .. "   " .. s_rwt
+	local h_text = s_time .. "   " .. s_rwt
 
-	h_tmr = h_int
-
-	for _,player in ipairs(minetest.get_connected_players()) do
-		local posi = player:get_pos()
-		local x = math.floor(posi.x+0.5)
-		local y = math.floor(posi.y+0.5)
-		local z = math.floor(posi.z+0.5)
-		local posistr = x.." | ".. y .." | ".. z
-
-		-- resulting hud string
-		local hud_display = h_text .. "\nPos: " .. posistr
-
-		-- append mapblock
-		local mapblockstr = math.floor(x / 16) .. " | "
-				.. math.floor(y / 16) .. " | "
-				.. math.floor(z / 16)
-
-
-		hud_display = hud_display .. "\nBlock: " .. mapblockstr
-
-		updatehud(player,  hud_display)
+	for _, player in ipairs(minetest.get_connected_players()) do
+		updatehud(player,  h_text)
 	end
+
 end);
+
