@@ -53,6 +53,19 @@ local function generatehud(player)
 	player_hud[name] = hud
 end
 
+local function clearhud(player)
+
+	local name = player:get_player_name()
+
+	if not player_hud[name] then return end
+
+	local hud = player_hud[name]
+	if not hud then return end
+
+	player:hud_change(hud.id, "text", "")
+
+end
+
 local function updatehud(player, text)
 
 	local name = player:get_player_name()
@@ -120,7 +133,7 @@ minetest.register_chatcommand("poshud", {
 
 		elseif param == "off" then
 			player_hud_enabled[name] = false
-			removehud(player)
+			clearhud(player)
 
 		else
 			return true, "Usage: poshud [on|off]"
