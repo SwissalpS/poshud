@@ -125,13 +125,16 @@ minetest.register_chatcommand("poshud", {
 	params = "on|off",
 	description = "Turn poshud on or off",
 	func = function(name, param)
+
 		local player = minetest.get_player_by_name(name)
 
 		if param == "on" then
+			player:get_meta():set_string("poshud_lightMain", "on")
 			player_hud_enabled[name] = true
 			generatehud(player)
 
 		elseif param == "off" then
+			player:get_meta():set_string("poshud_lightMain", "")
 			player_hud_enabled[name] = false
 			clearhud(player)
 
@@ -139,6 +142,7 @@ minetest.register_chatcommand("poshud", {
 			return true, "Usage: poshud [on|off]"
 
 		end
+
 	end
 })
 
@@ -184,7 +188,23 @@ minetest.register_globalstep(function()
 		updatehud(player,  h_text)
 	end
 
-end);
+end)
+
+minetest.register_on_joinplayer(function(player)
+
+	local name = player:get_player_name()
+	if "on" == player:get_meta():get_string("poshud_lightMain") then
+
+		player_hud_enabled[name] = true
+		generatehud(player)
+
+	else
+
+		player_hud_enabled[name] = false
+
+	end
+
+end)
 
 print("[poshud_light] loaded")
 
