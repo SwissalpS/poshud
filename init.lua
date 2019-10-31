@@ -186,3 +186,5 @@ minetest.register_globalstep(function()
 
 end);
 
+print("[poshud_light] loaded")
+
